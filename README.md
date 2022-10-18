@@ -1,1 +1,1 @@
-# Snake
+Just snake
