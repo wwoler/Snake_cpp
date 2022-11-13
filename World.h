@@ -129,7 +129,7 @@ public:
 			}
 
 			_snake->threaded_logic();
-			Sleep(10);
+			Sleep(30);
 
 		}
 
