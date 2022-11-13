@@ -11,124 +11,214 @@
 class world
 {
 private:
-	uint16_t const __width;
-	uint16_t const __height;
-	fruits*        __fruit;
-	snacke*        __snake;
-	score*         __score;
-	HANDLE         __hConsole;
+	uint16_t const      _width;
+	uint16_t const      _height;
+	fruits*             _fruit;
+	snacke*             _snake;
+	score*              _score;
+	HANDLE              _hConsole;
+	bool                _gameStatus;
+	CONSOLE_CURSOR_INFO _cursorInfo;
+
+	void printWorld()
+	{
+
+		for (int h = 0; h < _height; ++h)
+		{
+
+			for (int w = 0; w < _width; ++w)
+			{
+				if (h == 0 && w == 0)
+					std::wcout << L'┌';
+				else if (h == 0 && w == _width - 1)
+					std::wcout << L'┐';
+				else if (h == _height - 1 && w == 0)
+					std::wcout << L'└';
+				else if (h == _height - 1 && w == _width - 1)
+					std::wcout << L'┘';
+				else if (h == 0 || h == _height - 1)
+					std::wcout << L'─';
+				else if (w == 0 || w == _width - 1)
+					std::wcout << L'│';
+				else
+					std::wcout << ' ';
+			}
+			std::wcout << std::endl;
+
+		}
+	}
 
 public:
 	world(uint16_t const& width_, uint16_t const& height_)
-		:__width(width_), __height(height_) {}
+		:_width(width_), _height(height_) {}
 
-	void initWorld()
+	auto initWorld() -> void
 	{
-		__fruit = new fruits(__width, __height);
-		__snake = new snacke(__width, __height);
-		__score = new score();
-		__hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
+		_cursorInfo = { sizeof(_cursorInfo), false };
+		_gameStatus = true;
+		_hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		_fruit = new fruits(_width, _height);
+		_snake = new snacke(_width, _height);
+		_score = new score();
+		SetConsoleCursorInfo(_hConsole, &_cursorInfo);
+		SetConsoleTextAttribute(_hConsole, 0xb);
+		printWorld();
+		printFruit();
+		printSnake();
+		printScore();
 	}
 
 
-	void printWorld() const
+
+	auto WorldLogic() -> bool
 	{
-		SetConsoleTextAttribute(__hConsole, 0xb);
-
-		wchar_t const* symbol1 = L"\u005F";
-		wchar_t const* symbol2 = L"\u203E";
-
-		std::wstring str;
-		str.reserve(__width + 1);
-		for (uint16_t i = 0; i < __width; ++i)
-			str.append(symbol1);
-
-		std::wcout << L" " + str << '\n';
+		printSnake();
+		_snake->SnakeLogic();
+		objectLogic();
+		Sleep(50);
+		return _gameStatus;
+	}
 
 
-		for (uint16_t h = 0; h < __height; ++h)
+	auto objectLogic() -> void
+	{
+		if (_snake->getXcoord() == _fruit->getXcoord() &&
+			_snake->getYcoord() == _fruit->getYcoord())
 		{
-			std::wcout << L'|';
-			for (uint16_t w = 0; w < __width; ++w)
+			removeFruit();
+			_snake->addTail();
+			_score->addPoint();
+			printScore();
+			_fruit->FruitLogic();
+			printFruit();
+			while (true)
 			{
-				if (__fruit->getYcoord() == h && __fruit->getXcoord() == w)
+				bool FruitOnSnake = false;
+				for (uint16_t i = 0u; i < _snake->getNtail(); ++i)
 				{
-					SetConsoleTextAttribute(__hConsole, 0xa);
-					__fruit->printFruit();
-					SetConsoleTextAttribute(__hConsole, 0xb);
-				}
-				else if (__snake->getYcoord() == h && __snake->getXcoord() == w)
-				{
-					SetConsoleTextAttribute(__hConsole, 0xc);
-					__snake->printSnacke();
-					SetConsoleTextAttribute(__hConsole, 0xb);
-				}
-
-				else 
-				{
-					bool bFind = false;
-					for (uint16_t t = 0; t < __snake->getNtail(); ++t)
+					if (_snake->getXtailCoord(i) == _fruit->getXcoord() &&
+						_snake->getYtailCoord(i) == _fruit->getYcoord())
 					{
-						if (__snake->getXtailCoord(t) == w && __snake->getYtailCoord(t) == h)
-						{
-							bFind = !bFind;
-							SetConsoleTextAttribute(__hConsole, 0xc);
-							std::wcout << L'+';
-							SetConsoleTextAttribute(__hConsole, 0xb);
-							break;
-						}
+						FruitOnSnake = true;
+						removeFruit();
+						break;
 					}
-					if (!bFind)
-						std::wcout << L" ";
+
+				}
+				if (!FruitOnSnake)
+					break;
+				_fruit->FruitLogic();
+			}
+			printFruit();
+		}
+	}
 	
+
+	auto threaded_logic() -> void
+	{
+
+		while (_gameStatus)
+		{
+
+			for (uint16_t i = 0; i < _snake->getNtail(); ++i)
+			{
+				if (_snake->getXcoord() == _snake->getXtailCoord(i) && _snake->getYcoord() == _snake->getYtailCoord(i))
+				{
+					_gameStatus = false;
+					SetConsoleTextAttribute(_hConsole, 3);
 				}
 			}
-			std::wcout << L'|';
-			std::wcout << std::endl;
+
+			_snake->threaded_logic();
+			Sleep(10);
+
 		}
 
-		str.clear();
-		for (uint16_t i = 0; i < __width; ++i)
-			str.append(symbol2);
-		std::wcout << L" " + str << std::endl;
-		std::wcout << L"Score: " << __score->GetScore() << std::endl;
-		
 	}
 
 
-
-	void WorldLogic()
+	auto printFruit() -> void
 	{
-		__snake->SnackeLogic();
+		SetConsoleTextAttribute(_hConsole, 0xC);
+		_fruit->get_console_coord().X = _fruit->getXcoord();
+		_fruit->get_console_coord().Y = _fruit->getYcoord();
+		SetConsoleCursorPosition(_hConsole, _fruit->get_console_coord());
+		std::wcout << '$';
+
 	}
 
-	
-	void threaded_logic()
+	auto removeFruit() -> void
 	{
-		while (true)
+		_fruit->get_console_coord().X = _fruit->getXcoord();
+		_fruit->get_console_coord().Y = _fruit->getYcoord();
+		SetConsoleCursorPosition(_hConsole, _fruit->get_console_coord());
+		std::wcout << ' ';
+	}
+
+	auto printSnake() -> void
+	{
+		SetConsoleTextAttribute(_hConsole, 0xA);
+		SetConsoleCursorPosition(_hConsole, _snake->get_console_coord());
+		std::wcout << ' ';
+		if (_snake->getNtail() > 0)
 		{
-			__snake->threaded_logic();
 
-			if (__fruit->getXcoord() == __snake->getXcoord() &&
-				__fruit->getYcoord() == __snake->getYcoord())
+			for (int i = 0; i < _snake->getNtail(); ++i)
 			{
-				__snake->addTail();
-				__fruit->FruitLogic();
-				__score->addPoint();
+				_snake->get_console_coord().X = _snake->getXtailCoord(i); 
+				_snake->get_console_coord().Y = _snake->getYtailCoord(i);
+				if (_snake->get_console_coord().X == 0 && _snake->get_console_coord().Y == 0)
+					continue;
+				SetConsoleCursorPosition(_hConsole, _snake->get_console_coord());
+				std::wcout << 'o';
 			}
 
+			_snake->get_console_coord().X = _snake->getOXcoord();
+			_snake->get_console_coord().Y = _snake->getOYcoord();
+			if (!(_snake->get_console_coord().X == 0 && _snake->get_console_coord().Y == 0))
+			{
+				SetConsoleCursorPosition(_hConsole, _snake->get_console_coord());
+				std::wcout << ' ';
+			}
 		}
+
+		_snake->get_console_coord().X = _snake->getXcoord();
+		_snake->get_console_coord().Y = _snake->getYcoord();
+		SetConsoleCursorPosition(_hConsole, _snake->get_console_coord());
+		std::wcout << _snake->get_symbol();
+	}
+
+	auto printScore() -> void
+	{
+		SetConsoleTextAttribute(_hConsole, 0xb);
+		COORD coord;
+		coord.X = _width + 10;
+		coord.Y = 0;
+		SetConsoleCursorPosition(_hConsole, coord);
+		std::wcout << L"Snake 2.0\n";
+		coord.Y = 1;
+		SetConsoleCursorPosition(_hConsole, coord);
+		std::wcout << L"Score: " << _score->GetScore();
+	
 
 	}
 
+	bool game_status()
+	{
+		return _gameStatus;
+	}
+
+	score* get_score()
+	{
+		return _score;
+	}
 
 	~world()
 	{
-		delete __score;
-		delete __snake;
-		delete __fruit;
-		CloseHandle(__hConsole);
+		delete _score;
+		delete _snake;
+		delete _fruit;
+		CloseHandle(_hConsole);
 	}
 
 };

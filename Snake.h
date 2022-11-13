@@ -11,158 +11,176 @@
 #define RIGHT 77
 #define LEFT  75
 
+
 class snacke
 {
 private:
-	
-	uint16_t  __tailX[100];
-	uint16_t  __tailY[100];
-	uint16_t  __nTail = 0;
 
+	uint16_t  _tailX[100];
+	uint16_t  _tailY[100];
+	uint16_t  _nTail;
+	uint16_t  _OtailX;
+	uint16_t  _OtailY;
 
-	uint16_t  __x;
-	uint16_t  __y;
-	uint16_t  __width;
-	uint16_t  __height;
-	wchar_t   __ch;
+	COORD     _coord;
 
-	bool      __up;
-	bool      __down;
-	bool      __right;
-	bool      __left;
-	bool      __stop;
-	bool*     __prev_move;
+	uint16_t  _x;
+	uint16_t  _y;
+	uint16_t  _width;
+	uint16_t  _height;
+	wchar_t   _ch;
 
-	uint16_t  __speed = 1;
+	bool      _up;
+	bool      _down;
+	bool      _right;
+	bool      _left;
+	bool      _stop;
+	bool*     _prev_move;
 
-	void move_up()
+	uint16_t const  _move = 1;
+
+	auto move_up() -> void
 	{
-		__y -= __speed;
+		_y -= _move;
 	}
 
-	void move_down()
+	auto move_down() -> void
 	{
-		__y += __speed;
+		_y += _move;
 	}
 
-	void move_left()
+	auto move_left() -> void
 	{
-		__x -= __speed;
+		_x -= _move;
 	}
 
-	void move_right()
+	auto move_right() -> void
 	{
-		__x += __speed;
+		_x += _move;
 	}
 
 public:
+
 	snacke(uint16_t x_, uint16_t y_)
 	{
-		__width     = x_;
-		__height    = y_;
-		__x         = x_ / 2 - 1;
-		__y         = y_ / 2 - 1;
-		__ch        = L'@';
+		_width = x_;
+		_height = y_;
+		_x = x_ / 2;
+		_y = y_ / 2 - 1;
+		_ch = L'@';
+		_nTail = 0;
+		
+		_coord.X = _x;
+		_coord.Y = _y;
 
-		__up        = false;
-		__down      = false;
-		__right     = false;
-		__left      = false;
-		__stop      = true;
-		__prev_move = &__stop;	
+		_up    = false;
+		_down  = false;
+		_right = false;
+		_left  = false;
+		_stop  = true;
+		_prev_move = &_stop;
 	}
 
-	void printSnacke() const
-	{ 
-		std::wcout << __ch;
-	}
-
-	void addTail()
+	auto get_symbol() -> wchar_t
 	{
-		++__nTail;
+		return _ch;
 	}
 
-	uint16_t getNtail() const
+	auto addTail() -> void
 	{
-		return __nTail;
+		++_nTail;
 	}
 
-	uint16_t const getXcoord() const
+	auto getNtail() const -> uint16_t const
 	{
-		return __x;
+		return _nTail;
 	}
 
-	uint16_t const getYcoord() const
+	auto getXcoord() const -> uint16_t const
 	{
-		return __y;
+		return _x;
 	}
 
-	uint16_t const getXtailCoord(uint16_t const& i) const
+	auto getYcoord() const -> uint16_t const
 	{
-		return __tailX[i];
+		return _y;
 	}
 
-	uint16_t const getYtailCoord(uint16_t const& i) const
+	auto getOXcoord() const -> uint16_t const
 	{
-		return __tailY[i];
+		return _OtailX;
+	}
+
+	auto getOYcoord() const -> uint16_t const
+	{
+		return _OtailY;
+	}
+
+	auto getXtailCoord(uint16_t const& i) const -> uint16_t const
+	{
+		return _tailX[i];
+	}
+
+	auto getYtailCoord(uint16_t const& i) const -> uint16_t const
+	{
+		return _tailY[i];
 	}
 
 
-	void SnackeLogic()
+	auto SnakeLogic() -> void
 	{
+
 		int16_t nTailX1, nTailY1, nTailX2, nTailY2;
 
 		
-		
-		nTailX1 = __tailX[0];
-		nTailY1 = __tailY[0];
-		__tailX[0] = __x;
-		__tailY[0] = __y;
-		
+		_OtailX = _tailX[_nTail - 1];
+		_OtailY = _tailY[_nTail - 1];
 
-		
-		for (uint16_t i = 1; i < __nTail; ++i)
+		nTailX1 = _tailX[0];
+		nTailY1 = _tailY[0];
+		_tailX[0] = _x;
+		_tailY[0] = _y;
+
+		for (uint16_t i = 1; i < _nTail; ++i)
 		{
-			nTailX2 = __tailX[i];
-			nTailY2 = __tailY[i];
-			__tailX[i] = nTailX1;
-			__tailY[i] = nTailY1;
+			nTailX2 = _tailX[i];
+			nTailY2 = _tailY[i];
+			_tailX[i] = nTailX1;
+			_tailY[i] = nTailY1;
 			nTailX1 = nTailX2;
 			nTailY1 = nTailY2;
 
 		}
 
 
-		if (__up)
+		if (_up)
 			move_up();
-		else if (__down)
+		else if (_down)
 			move_down();
-		else if (__left)
+		else if (_left)
 			move_left();
-		else if (__right)
+		else if (_right)
 			move_right();
-
-		for (uint16_t i = 0; i < __nTail; ++i)
-		{
-			if (__x == __tailX[i] && __y == __tailY[i])
-				exit(1);
-		}
-
 
 	}
 
+	auto get_console_coord() -> COORD&
+	{
+		return _coord;
+	}
 
-	void threaded_logic()
+	auto threaded_logic()    -> void
 	{
 
-		if (__x >= __width)
-			__x = 0;
-		else if (__x <= 0)
-			__x = __width;
-		if (__y <= 0)
-			__y = __height;
-		else if (__y >= __height)
-			__y = 0;
+		if (_x >= _width - 1)
+			_x = 1;
+		else if (_x < 1)
+			_x = _width - 2;
+
+		if (_y >= _height - 1)
+			_y = 1;
+		else if (_y < 1)
+			_y = _height - 2;
 
 
 		if (_kbhit())
@@ -170,40 +188,37 @@ public:
 			switch (_getch())
 			{
 			case UP:
-				if (__prev_move == &__down)
+				if (_prev_move == &_down)
 					break;
-				__ch = L'\u02C4';
-				*__prev_move = false;
-				__up = true;
-				__prev_move = &__up;
+				*_prev_move = false;
+				_up = true;
+				_prev_move = &_up;
 				break;
 
 			case DOWN:
-				if (__prev_move == &__up)
+				if (_prev_move == &_up)
 					break;
-				__ch = L'\u02C5';
-				*__prev_move = false;
-				__down = true;
-				__prev_move = &__down;
+				*_prev_move = false;
+				_down = true;
+				_prev_move = &_down;
 				break;
 
 			case LEFT:
-				if (__prev_move == &__right)
+				if (_prev_move == &_right)
 					break;
-				__ch = L'\u003C';
-				*__prev_move = false;
-				__left = true;
-				__prev_move = &__left;
+				*_prev_move = false;
+				_left = true;
+				_prev_move = &_left;
 				break;
 
 			case RIGHT:
-				if (__prev_move == &__left)
+				if (_prev_move == &_left)
 					break;
-				__ch = L'\u02C3';
-				*__prev_move = false;
-				__right = true;
-				__prev_move = &__right;
+				*_prev_move = false;
+				_right = true;
+				_prev_move = &_right;
 				break;
+				
 
 			default:
 				break;

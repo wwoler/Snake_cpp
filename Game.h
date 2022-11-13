@@ -5,37 +5,42 @@
 class game
 {
 private:
-	world*      __world;
-	std::thread __thread;
+	world*              _world;
+	std::thread         _thread;
+
+	bool                _isOver;
 
 public:
 	game()
 	{
-		__world = new world(20, 20);
+		_world = new world(55, 25);
+		_isOver = false;
 	}
 
-	void run()
+	auto run() -> void
 	{
-		__world->initWorld();
+		_world->initWorld();
 
-		__thread = std::move(std::thread(&world::threaded_logic, __world));
+		_thread = std::move(std::thread(&world::threaded_logic, _world));
 
-		while (1)
+		Sleep(100);
+
+		while (_world->game_status())
 		{
-			__world->printWorld();
-			__world->WorldLogic();
-			Sleep(1.5);
-			system("cls");
+			_world->WorldLogic();
 		}
 
+		system("cls");
+		std::wcout << "Game over\nYour score: " <<
+			_world->get_score()->GetScore() << "\a\n\n\n\n";
 		
 	}
 
 	~game()
 	{
-		delete __world;
-		if (__thread.joinable())
-			__thread.detach();
+		delete _world;
+		if (_thread.joinable())
+			_thread.join();
 	}
 
 };

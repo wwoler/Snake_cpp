@@ -1,14 +1,22 @@
 ﻿#include "Game.h"
 
-int main()
+auto main() -> int
 {
 	_setmode(_fileno(stdout), _O_U16TEXT);
-	_setmode(_fileno(stdin), _O_U16TEXT);
 
+	srand(time(NULL));
 	game* game_ = new game();
-	game_->run();
+	try
+	{
+		game_->run();
+	}
+	catch (...)
+	{
+
+	}
 
 	delete game_;
-	
-	return 0;
+
+	return EXIT_SUCCESS;
 }
+

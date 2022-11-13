@@ -6,18 +6,19 @@
 class score
 {
 private:
-	uint16_t __points;
+	uint16_t _points;
 public:
-	score() = default;
+	score() : _points(0) {}
 
-	void addPoint()
+	auto addPoint() -> void
 	{
-		++__points;
+		++_points;
+
 	}
 
-	uint16_t const& GetScore() const
+	auto GetScore() const -> uint16_t const&
 	{
-		return __points;
+		return _points;
 	}
 
 };
