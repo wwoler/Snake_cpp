@@ -73,8 +73,8 @@ public:
 	auto WorldLogic() -> bool
 	{
 		printSnake();
-		_snake->SnakeLogic();
 		objectLogic();
+		_snake->SnakeLogic();
 		Sleep(50);
 		return _gameStatus;
 	}
@@ -89,10 +89,10 @@ public:
 			_snake->addTail();
 			_score->addPoint();
 			printScore();
-			_fruit->FruitLogic();
 			printFruit();
 			while (true)
 			{
+				_fruit->FruitLogic();
 				bool FruitOnSnake = false;
 				for (uint16_t i = 0u; i < _snake->getNtail(); ++i)
 				{
@@ -107,7 +107,6 @@ public:
 				}
 				if (!FruitOnSnake)
 					break;
-				_fruit->FruitLogic();
 			}
 			printFruit();
 		}
