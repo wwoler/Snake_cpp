@@ -3,8 +3,8 @@
 auto main() -> int
 {
 	_setmode(_fileno(stdout), _O_U16TEXT);
-
 	srand(time(NULL));
+
 	game* game_ = new game();
 	try
 	{
@@ -16,7 +16,7 @@ auto main() -> int
 	}
 
 	delete game_;
-
+	system("pause");
 	return EXIT_SUCCESS;
 }
 

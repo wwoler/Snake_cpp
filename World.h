@@ -72,10 +72,10 @@ public:
 
 	auto WorldLogic() -> bool
 	{
+		Sleep(50);
 		printSnake();
 		objectLogic();
 		_snake->SnakeLogic();
-		Sleep(50);
 		return _gameStatus;
 	}
 
@@ -85,11 +85,9 @@ public:
 		if (_snake->getXcoord() == _fruit->getXcoord() &&
 			_snake->getYcoord() == _fruit->getYcoord())
 		{
-			removeFruit();
 			_snake->addTail();
 			_score->addPoint();
 			printScore();
-			printFruit();
 			while (true)
 			{
 				_fruit->FruitLogic();
@@ -100,7 +98,6 @@ public:
 						_snake->getYtailCoord(i) == _fruit->getYcoord())
 					{
 						FruitOnSnake = true;
-						removeFruit();
 						break;
 					}
 

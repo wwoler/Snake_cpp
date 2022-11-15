@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <io.h>
 #include <conio.h>
+#include <vector>
 
 #define UP    72
 #define DOWN  80
