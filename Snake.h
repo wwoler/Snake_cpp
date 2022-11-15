@@ -17,28 +17,27 @@ class snacke
 {
 private:
 
-	uint16_t  _tailX[100];
-	uint16_t  _tailY[100];
-	uint16_t  _nTail;
-	uint16_t  _OtailX;
-	uint16_t  _OtailY;
+	std::vector<uint16_t>  _tailX;
+	std::vector<uint16_t>  _tailY;
+	uint16_t               _OtailX;
+	uint16_t               _OtailY;
 
-	COORD     _coord;
+	COORD                  _coord;
 
-	uint16_t  _x;
-	uint16_t  _y;
-	uint16_t  _width;
-	uint16_t  _height;
-	wchar_t   _ch;
+	uint16_t               _x;
+	uint16_t               _y;
+	uint16_t               _width;
+	uint16_t               _height;
+	wchar_t                _ch;
 
-	bool      _up;
-	bool      _down;
-	bool      _right;
-	bool      _left;
-	bool      _stop;
-	bool*     _prev_move;
+	bool                   _up;
+	bool                   _down;
+	bool                   _right;
+	bool                   _left;
+	bool                   _stop;
+	bool*                  _prev_move;
 
-	uint16_t const  _move = 1;
+	uint16_t const         _move = 1;
 
 	auto move_up() -> void
 	{
@@ -69,7 +68,6 @@ public:
 		_x = x_ / 2;
 		_y = y_ / 2 - 1;
 		_ch = L'@';
-		_nTail = 0;
 		
 		_coord.X = _x;
 		_coord.Y = _y;
@@ -89,12 +87,13 @@ public:
 
 	auto addTail() -> void
 	{
-		++_nTail;
+		_tailX.push_back(0);
+		_tailY.push_back(0);
 	}
 
 	auto getNtail() const -> uint16_t const
 	{
-		return _nTail;
+		return _tailX.size();
 	}
 
 	auto getXcoord() const -> uint16_t const
@@ -119,12 +118,12 @@ public:
 
 	auto getXtailCoord(uint16_t const& i) const -> uint16_t const
 	{
-		return _tailX[i];
+		return  getNtail() > 0 ? _tailX[i] : 0;
 	}
 
 	auto getYtailCoord(uint16_t const& i) const -> uint16_t const
 	{
-		return _tailY[i];
+		return  getNtail() > 0 ? _tailY[i] : 0;
 	}
 
 
@@ -134,15 +133,18 @@ public:
 		int16_t nTailX1, nTailY1, nTailX2, nTailY2;
 
 		
-		_OtailX = _tailX[_nTail - 1];
-		_OtailY = _tailY[_nTail - 1];
+		if (getNtail() > 0)
+		{
+			_OtailX = _tailX[getNtail() - 1];
+			_OtailY = _tailY[getNtail() - 1];
 
-		nTailX1 = _tailX[0];
-		nTailY1 = _tailY[0];
-		_tailX[0] = _x;
-		_tailY[0] = _y;
+			nTailX1 = _tailX[0];
+			nTailY1 = _tailY[0];
+			_tailX[0] = _x;
+			_tailY[0] = _y;
+		}
 
-		for (uint16_t i = 1; i < _nTail; ++i)
+		for (uint16_t i = 1; i < getNtail(); ++i)
 		{
 			nTailX2 = _tailX[i];
 			nTailY2 = _tailY[i];
