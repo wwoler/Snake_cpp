@@ -72,10 +72,10 @@ public:
 
 	auto WorldLogic() -> bool
 	{
+		Sleep(50);
 		printSnake();
 		objectLogic();
 		_snake->SnakeLogic();
-		Sleep(50);
 		return _gameStatus;
 	}
 
